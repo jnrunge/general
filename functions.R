@@ -1,9 +1,13 @@
+options(repr.plot.width=10, repr.plot.height=10)
+
 library(readr)
 library(stringr)
 library(dplyr)
 library(tidyr)
 library(data.table)
+options(datatable.fread.datatable=FALSE)
 library(readxl)
+
 fread_and_bind_files=function(list_of_files_full_path)
     {
     for(file in list_of_files_full_path)
@@ -21,21 +25,7 @@ fread_and_bind_files=function(list_of_files_full_path)
     }
     return(df)
     }
-plate_to_labid=fread("~/columbia2019/firstplate_to_csv.tsv", data.table=FALSE)
-plate_to_labid$Sample=str_replace(plate_to_labid$Sample, "m", "")
-getLabID = function(x, plate_to_labid)
-    {
-    if(length(plate_to_labid$Sample[plate_to_labid$Final_ID == x | plate_to_labid$Final_ID_2 == x | plate_to_labid$Final_ID_3 == x | plate_to_labid$Final_ID_4 == x])==0){
-        return(NA)
-        }
-    if(suppressWarnings(as.numeric(x) %in% 1:12))
-        {
-        return(as.character(x))
-        }else
-        {
-        return(as.character(plate_to_labid$Sample[plate_to_labid$Final_ID == x | plate_to_labid$Final_ID_2 == x | plate_to_labid$Final_ID_3 == x | plate_to_labid$Final_ID_4 == x]))
-        }
-}
+
 execute_cmd_sbatch=function(cmd,mem="4G",cpu="1",time="short",acc="ziab",env="samtools",jobname="wrap"){
     if(time=="short"){
         time="11:59:00"
@@ -107,3 +97,85 @@ fancy_scientific_plot=function(l){
      l <- gsub("e", "%*%10^", l)
      # return this as an expression
      return(parse(text=l))    }
+
+getArgs=function(){
+    args = commandArgs(trailingOnly=TRUE)
+    return(args)
+}
+
+execute_complex_sbatch=function(
+                    list_of_cmds,jobname,scripts_dir,uniqueRunID,
+                    cores,mem,time,env,initial_timedate,
+                    jobs_simul,jobs_total){
+
+    stop("This needs to be adapted for CU/Strasbourg cross-compatibility")
+    
+    if(time=="short"){
+        time="11:59:00"
+        }else{
+        time="119:59:00"
+        }
+    
+    
+    
+    if(!endsWith(scripts_dir,"/")){
+        scripts_dir=paste0(scripts_dir,"/")
+    }
+    
+    if(!dir.exists(scripts_dir)){
+        dir.create(scripts_dir)
+        dir.create(paste0(scripts_dir,"logs"))
+    }
+    
+    sbatch_list=paste0(scripts_dir,jobname,".list")
+    
+    if(file.exists(sbatch_list)){
+        if(file.mtime(sbatch_list)<initial_timedate){
+            file.remove(sbatch_list)
+        }
+    }
+    
+    
+    cmds=paste(list_of_cmds,collapse="
+")
+    
+    sbatch=paste("#!/bin/bash
+#SBATCH -p fast          # The account name for the job
+#SBATCH --job-name=",jobname,"  # The job name
+#SBATCH -o ",scripts_dir,"logs/",jobname,"-",uniqueRunID,".out
+#SBATCH -e ",scripts_dir,"logs/",jobname,"-",uniqueRunID,".err
+#SBATCH -c ",cores,"                 # The number of cpu cores to use
+#SBATCH --time=",time,"       # The time the job will take to run 
+#SBATCH --mem=",mem,"
+
+date
+
+. ~/activate.sh ",env,"
+
+",cmds,"
+
+conda activate JupyteR4
+Rscript ~/BrusselSprouts/scripts/Execute_Sbatches.R '",initial_timedate,"' ",sbatch_list," ",jobs_simul," ",jobname," ",jobs_total,"
+
+date
+    ",sep="")
+
+            sbatch_file=paste(scripts_dir,jobname,"-",uniqueRunID,".sbatch",sep="")
+
+            writeLines(sbatch, sbatch_file)
+            
+            write(sbatch_file,file=sbatch_list,append=TRUE)
+    
+    print(sbatch_file)
+    
+    return(sbatch_list)
+    
+    
+}
+
+start_sbatch_list=function(sbatch_list, jobs_simul, jobname, initial_timedate){
+    if(file.exists(sbatch_list)){
+    print(system(command=paste("wc -l ", sbatch_list, sep=""),intern=TRUE))
+    print(system(command=paste("Rscript ~/BrusselSprouts/scripts/Execute_Sbatches.R '",initial_timedate,"' ",sbatch_list," ",jobs_simul," ",jobname, sep=""), intern=TRUE))
+    }
+}
