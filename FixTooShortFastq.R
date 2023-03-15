@@ -120,8 +120,6 @@ if(isUnexpectedEndOfFile(test2)){
     FixFile(file2,file1,line_cutoff)
 }
 
-FixFile(file1,file2,line_cutoff)
-
 for(f in c(file1,file2)){
     file.remove(paste0(f,".gziptest"))
     print(system(command=paste0("gzip -t ",f," >> ",f,".gziptest 2>&1"),intern=TRUE))
