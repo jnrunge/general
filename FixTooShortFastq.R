@@ -31,7 +31,8 @@ test2=readLines(paste0(file2,".gziptest"))
 isUnexpectedEndOfFile=function(x){ 
     # have to see if the file has the problem I am trying to solve
     if(length(x)>0){
-        return(sum(grepl("unexpected end of file",x,fixed=TRUE))>0)
+        return(sum(grepl("unexpected end of file",x,fixed=TRUE)|
+            grepl("invalid compressed data",x,fixed=TRUE))>0)
     }
     return(FALSE)
 }
