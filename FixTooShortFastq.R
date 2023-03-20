@@ -27,6 +27,8 @@ for(f in c(file1,file2)){
 
 test1=readLines(paste0(file1,".gziptest"))
 test2=readLines(paste0(file2,".gziptest"))
+test1
+test2
 
 isUnexpectedEndOfFile=function(x){ 
     # have to see if the file has the problem I am trying to solve
@@ -54,7 +56,15 @@ WhereFastqIsBroken=function(x){
         which_plus=c(which_plus,rep(-999,abs(dist)))
     }
     
-    return(which_at!=(which_plus-2))
+    error1=which_at!=(which_plus-2)
+    
+    # lets compare the length of seq and qual (another possible error)
+    nchar_seq=nchar(x[which_at+1])
+    nchar_qual=nchar(x[which_at+3])
+    
+    error2=nchar_seq!=nchar_qual
+    
+    return(error1 | error2)
     
 }
 
