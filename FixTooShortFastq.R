@@ -47,6 +47,10 @@ WhereFastqIsBroken=function(x){
     which_at=which(startsWith(x,"@"))
     which_plus=which(startsWith(x,"+"))
     
+    if(length(which_at)==0|length(which_plus)==0){
+        return(rep(TRUE,length(x)))
+    }
+    
     dist=length(which_at)-length(which_plus)
     
     if(dist<0){
@@ -59,10 +63,14 @@ WhereFastqIsBroken=function(x){
     error1=which_at!=(which_plus-2)
     
     # lets compare the length of seq and qual (another possible error)
-    nchar_seq=nchar(x[which_at+1])
-    nchar_qual=nchar(x[which_at+3])
+    nchar_seq=nchar(x[which_at[which_at!=-999]+1])
+    nchar_qual=nchar(x[which_at[which_at!=-999]+3])
     
     error2=nchar_seq!=nchar_qual
+    
+    if(length(error2)<length(error1)){
+        error2=c(error2, rep(FALSE,length(error1)-length(error2)))
+    }
     
     return(error1 | error2)
     
