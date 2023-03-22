@@ -5,7 +5,7 @@ library(stringr)
 library(dplyr)
 library(tidyr)
 library(data.table)
-options(datatable.fread.datatable=FALSE)
+library(tidytable)
 library(readxl)
 
 fread_and_bind_files=function(list_of_files_full_path)
