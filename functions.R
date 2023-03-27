@@ -181,7 +181,7 @@ start_sbatch_list=function(sbatch_list, jobs_simul, jobname, initial_timedate){
 }
 
 slurm_check_jobs_still_running_numeric=function(username,jobname){
-    return(length(suppressWarnings(system(command=paste0("sacct -u ",username," --name=",jobname," | grep -v COM | grep -v FAI | cut -f 1 -d' ' | grep -v ba | grep '^[0-9]'"),intern=TRUE))))
+    return(length(suppressWarnings(system(command=paste0("sacct -u ",username," --name=",jobname," | grep -v COM | grep -v FAI | grep -v CAN | cut -f 1 -d' ' | grep -v ba | grep '^[0-9]'"),intern=TRUE))))
 }
 
 slurm_check_jobs_still_running=function(username,jobname){
