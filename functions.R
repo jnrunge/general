@@ -33,13 +33,13 @@ fread_and_bind_files=function(list_of_files_full_path)
     return(df)
     }
 
-execute_cmd_sbatch=function(cmd,mem="4G",cpu="1",time="short",acc="ziab",env="samtools",jobname="wrap"){
+execute_cmd_sbatch=function(cmd,mem="4G",cpu="1",time="short",acc="ziab",env="samtools",jobname="wrap", activateEnvScript){
     if(time=="short"){
         time="11:59:00"
         }else{
         time="119:59:00"
         }
-    cmd<-paste("sbatch -c ",cpu," --mem=",mem," --job-name=",jobname," -A ",acc," -t ",time," --wrap '. ~/",env,".sh; ",cmd,"'",sep="")
+    cmd<-paste("sbatch -c ",cpu," --mem=",mem," --job-name=",jobname," -A ",acc," -t ",time," --wrap '. ",activateEnvScript," ",env,"; ",cmd,"'",sep="")
     print(cmd)
     print(system(command=cmd, intern=TRUE))
     }
