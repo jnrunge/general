@@ -1,5 +1,7 @@
 options(repr.plot.width=10, repr.plot.height=10)
-
+if (suppressWarnings(!require('this.path'))) install.packages('this.path', repos='https://ftp.gwdg.de/pub/misc/cran/')
+library("this.path")
+setwd(this.dir())
 library(readr)
 library(stringr)
 library(dplyr)
@@ -106,9 +108,7 @@ getArgs=function(){
 execute_complex_sbatch=function(
                     list_of_cmds,jobname,scripts_dir,uniqueRunID,
                     cores,mem,time,env,initial_timedate,
-                    jobs_simul,jobs_total){
-
-    stop("This needs to be adapted for CU/Strasbourg cross-compatibility")
+                    jobs_simul,jobs_total=999,list_of_additional_flags, activateEnvScript,Execute_Sbatches_Env){
     
     if(time=="short"){
         time="11:59:00"
@@ -140,22 +140,27 @@ execute_complex_sbatch=function(
 ")
     
     sbatch=paste("#!/bin/bash
-#SBATCH -p fast          # The account name for the job
 #SBATCH --job-name=",jobname,"  # The job name
 #SBATCH -o ",scripts_dir,"logs/",jobname,"-",uniqueRunID,".out
 #SBATCH -e ",scripts_dir,"logs/",jobname,"-",uniqueRunID,".err
 #SBATCH -c ",cores,"                 # The number of cpu cores to use
 #SBATCH --time=",time,"       # The time the job will take to run 
 #SBATCH --mem=",mem,"
+",paste(list_of_additional_flags,collapse="
+    "),"
+
+set -xe
 
 date
 
-. ~/activate.sh ",env,"
+. ",activateEnvScript, " ",env,"
 
 ",cmds,"
 
-conda activate JupyteR4
-Rscript ~/BrusselSprouts/scripts/Execute_Sbatches.R '",initial_timedate,"' ",sbatch_list," ",jobs_simul," ",jobname," ",jobs_total,"
+
+cd ",this.dir(),"
+. ",activateEnvScript, " ",Execute_Sbatches_Env,"
+Rscript Execute_Sbatches.R '",initial_timedate,"' ",sbatch_list," ",jobs_simul," ",jobname," ",jobs_total,"
 
 date
     ",sep="")
@@ -176,7 +181,7 @@ date
 start_sbatch_list=function(sbatch_list, jobs_simul, jobname, initial_timedate){
     if(file.exists(sbatch_list)){
     print(system(command=paste("wc -l ", sbatch_list, sep=""),intern=TRUE))
-    print(system(command=paste("Rscript ~/BrusselSprouts/scripts/Execute_Sbatches.R '",initial_timedate,"' ",sbatch_list," ",jobs_simul," ",jobname, sep=""), intern=TRUE))
+    print(system(command=paste("Rscript Execute_Sbatches.R '",initial_timedate,"' ",sbatch_list," ",jobs_simul," ",jobname, sep=""), intern=TRUE))
     }
 }
 
