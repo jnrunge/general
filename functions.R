@@ -6,7 +6,7 @@ td=this.dir()
     }else{
         td=jnr_general_scripts_dir
     }
-    
+
 library(readr)
 library(stringr)
 library(dplyr)
@@ -151,7 +151,7 @@ execute_complex_sbatch=function(
 #SBATCH -c ",cores,"                 # The number of cpu cores to use
 #SBATCH --time=",time,"       # The time the job will take to run 
 #SBATCH --mem=",mem,"
-",paste(list_of_additional_flags,collapse="
+",paste(paste("#SBATCH",list_of_additional_flags,sep=" "),collapse="
     "),"
 
 set -xe
