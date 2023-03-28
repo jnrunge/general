@@ -1,7 +1,12 @@
 options(repr.plot.width=10, repr.plot.height=10)
-if (suppressWarnings(!require('this.path'))) install.packages('this.path', repos='https://ftp.gwdg.de/pub/misc/cran/')
+if(!exists("jnr_general_scripts_dir")){
+    if (suppressWarnings(!require('this.path'))) install.packages('this.path', repos='https://ftp.gwdg.de/pub/misc/cran/')
 library("this.path")
-setwd(this.dir())
+td=this.dir()
+    }else{
+        td=jnr_general_scripts_dir
+    }
+    
 library(readr)
 library(stringr)
 library(dplyr)
@@ -158,7 +163,7 @@ date
 ",cmds,"
 
 
-cd ",this.dir(),"
+cd ",td,"
 . ",activateEnvScript, " ",Execute_Sbatches_Env,"
 Rscript Execute_Sbatches.R '",initial_timedate,"' ",sbatch_list," ",jobs_simul," ",jobname," ",jobs_total,"
 
@@ -181,7 +186,7 @@ date
 start_sbatch_list=function(sbatch_list, jobs_simul, jobname, initial_timedate){
     if(file.exists(sbatch_list)){
     print(system(command=paste("wc -l ", sbatch_list, sep=""),intern=TRUE))
-    print(system(command=paste("Rscript Execute_Sbatches.R '",initial_timedate,"' ",sbatch_list," ",jobs_simul," ",jobname, sep=""), intern=TRUE))
+    print(system(command=paste("Rscript ",td,"Execute_Sbatches.R '",initial_timedate,"' ",sbatch_list," ",jobs_simul," ",jobname, sep=""), intern=TRUE))
     }
 }
 
