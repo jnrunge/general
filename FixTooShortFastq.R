@@ -3,8 +3,11 @@
 library(devtools)
 source_url('https://raw.githubusercontent.com/jnrunge/general/main/functions.R')
 args=getArgs() # two arguments: full paths to the two files (paired-end) or just one file (single end)
-if(length(args)>2){
+if(length(args)>3){
     stop("too many arguments")
+}
+if(length(args)<2){
+    stop("too few arguments")
 }
 if(length(args)==0){
     stop("no arguments")
@@ -16,6 +19,7 @@ if(length(args)==2){
     stop("single end not yet implemented")
 }
 
+jnr_general_scripts_dir=args[length(args)]
 
 # file2 can be optional and bam I have a general script
 
