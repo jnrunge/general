@@ -9,13 +9,10 @@ td=this.dir()
     }else{
         td=jnr_general_scripts_dir
     }
+library(tidytable)
 
 library(readr)
 library(stringr)
-library(dplyr)
-library(tidyr)
-library(data.table)
-library(tidytable)
 library(readxl)
 
 fread_and_bind_files=function(list_of_files_full_path)
