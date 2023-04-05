@@ -1,5 +1,8 @@
 options(repr.plot.width=10, repr.plot.height=10)
 if(!exists("jnr_general_scripts_dir")){
+    if(as.numeric(R.Version()["major"])<4){
+        stop("Please use R>=4 if you do not set 'jnr_general_scripts_dir' before invoking this script.")
+    }
     if (suppressWarnings(!require('this.path'))) install.packages('this.path', repos='https://ftp.gwdg.de/pub/misc/cran/')
 library("this.path")
 td=this.dir()
