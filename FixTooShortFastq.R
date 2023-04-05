@@ -13,7 +13,7 @@ if(length(args)==0){
     stop("no arguments")
 }
 file1=args[1]
-if(length(args)==2){
+if(length(args)==3){
     file2=args[2]
 }else{
     stop("single end not yet implemented")
