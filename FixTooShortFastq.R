@@ -20,6 +20,7 @@ if(length(args)==2){
 }
 
 jnr_general_scripts_dir=args[length(args)]
+source(paste0(jnr_general_scripts_dir,"functions.R"))
 
 # file2 can be optional and bam I have a general script
 
