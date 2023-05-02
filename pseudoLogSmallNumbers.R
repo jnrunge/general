@@ -7,3 +7,7 @@ pseudoLogSmallNumbers=function(which,original_level_break_values,multipliedby){
         return(scale_y_log10(breaks=breaks_, labels=as.character(original_level_break_values)))
     }
 }
+
+pseudo_log_for_small_numbers=function(which,original_level_break_values,multipliedby){
+    return(pseudoLogSmallNumbers(which,original_level_break_values,multipliedby))
+}
