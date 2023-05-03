@@ -1,8 +1,8 @@
 # this R script is supposed to make the most out of unexpectedly ending fastq.gz files. this can happen when the file was not transferred fully and the original file does not exist anymore.
-
+library(ShortRead)
 library(devtools)
 source_url('https://raw.githubusercontent.com/jnrunge/general/main/functions.R')
-args=getArgs() # two arguments: full paths to the two files (paired-end) or just one file (single end)
+args=getArgs() # two arguments: full paths to the two files (paired-end) or just one file (single end) ; final argument is the directory of the "general" dir
 if(length(args)>3){
     stop("too many arguments")
 }
@@ -16,7 +16,7 @@ file1=args[1]
 if(length(args)==3){
     file2=args[2]
 }else{
-    stop("single end not yet implemented")
+    file2=file1
 }
 
 jnr_general_scripts_dir=args[length(args)]
@@ -24,16 +24,14 @@ source(paste0(jnr_general_scripts_dir,"functions.R"))
 
 # file2 can be optional and bam I have a general script
 
-for(f in c(file1,file2)){
+for(f in c(file1)){
     if(!file.exists(paste0(f,".gziptest"))){
         print(system(command=paste0("gzip -t ",f," >> ",f,".gziptest 2>&1"),intern=TRUE))
     }
 }
 
 test1=readLines(paste0(file1,".gziptest"))
-test2=readLines(paste0(file2,".gziptest"))
 test1
-test2
 
 isUnexpectedEndOfFile=function(x){ 
     # have to see if the file has the problem I am trying to solve
@@ -129,27 +127,48 @@ FixFile=function(x,x2,cutoff){
                "mv -f ",x2,".tmp ",x2)
     
     print(cmd1)
-    print(cmd2)
-    
     print(system(command=cmd1,intern=TRUE))
-    print(system(command=cmd2,intern=TRUE))
+    if(x!=x2){
+        print(cmd2)
+        print(system(command=cmd2,intern=TRUE))
+    }
+    
+    
 }
 
 if(isUnexpectedEndOfFile(test1)){
     line_cutoff=getCutoff(file1)
     FixFile(file1,file2,line_cutoff)
 }
+
+for(f in c(file2)){
+    if(!file.exists(paste0(f,".gziptest"))){
+        print(system(command=paste0("gzip -t ",f," >> ",f,".gziptest 2>&1"),intern=TRUE))
+    }
+}
+
+test2=readLines(paste0(file2,".gziptest"))
+
+
 if(isUnexpectedEndOfFile(test2)){
     line_cutoff=getCutoff(file2)
     FixFile(file2,file1,line_cutoff)
 }
 
-for(f in c(file1,file2)){
-    file.remove(paste0(f,".gziptest"))
-    print(system(command=paste0("gzip -t ",f," >> ",f,".gziptest 2>&1"),intern=TRUE))
+fastq1=readFastq(file1)
+dups1=which(duplicated(as.character((ShortRead::id(fastq1)))))
+if(length(dups1)>0){
+    fastq1_filtered=fastq1[-1*dups1]
+    writeFastq(fastq1_filtered,paste0(file1,".tmp.gz"))
+    file.rename(paste0(file1,".tmp.gz"),file1)
 }
-test1=readLines(paste0(file1,".gziptest"))
-test2=readLines(paste0(file2,".gziptest"))
 
-test1
-test2
+if(file1!=file2){
+    fastq2=readFastq(file2)
+dups2=which(duplicated(as.character((ShortRead::id(fastq2)))))
+if(length(dups2)>0){
+    fastq2_filtered=fastq2[-1*dups2]
+    writeFastq(fastq2_filtered,paste0(file2,".tmp.gz"))
+    file.rename(paste0(file2,".tmp.gz"),file2)
+}
+}
