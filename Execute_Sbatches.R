@@ -43,22 +43,22 @@ if(length(args) > 5){
 getToRunJobs=function(user,jobname,concurrent_sbatches){
     count_of_running_jobs=as.numeric(system(command=paste("squeue -u ",user," -n ",jobname," | grep -v JOBID | wc -l",sep=""), intern=TRUE))
     
-concurrent_sbatches=concurrent_sbatches-count_of_running_jobs+1 # currently running job "substracted" by adding 1
-print(paste("Currently running ", count_of_running_jobs, " jobs. Can schedule ",concurrent_sbatches," more.", sep=""))
-return(concurrent_sbatches)
+can_still_run_x_sbatches=concurrent_sbatches-count_of_running_jobs+1 # currently running job "substracted" by adding 1
+print(paste("Currently running ", count_of_running_jobs, " jobs. Can schedule ",can_still_run_x_sbatches," more.", sep=""))
+return(can_still_run_x_sbatches)
 }
 
-concurrent_sbatches<-getToRunJobs(user,jobname,concurrent_sbatches)
+can_still_run_x_sbatches<-getToRunJobs(user,jobname,concurrent_sbatches)
 
 end_script=FALSE
 
-if(concurrent_sbatches > 0){
+if(can_still_run_x_sbatches > 0){
 
     sbatch_in_progress=paste(sbatch_list,".inprogress",sep="")
 
     sbatch_todo=sbatch_list[!(unlist(lapply(sbatch_in_progress, inprogressSinceInitialDate)))]
 
-    print(paste(length(sbatch_todo), " sbatches remaining! Running ", concurrent_sbatches, " more...",sep=""))
+    print(paste(length(sbatch_todo), " sbatches remaining! Running ", can_still_run_x_sbatches, " more...",sep=""))
     
     if(length(sbatch_todo)==0){
         print("No more sbatches to run!")
@@ -66,11 +66,11 @@ if(concurrent_sbatches > 0){
     }
 
     if(end_script==FALSE){
-        if(concurrent_sbatches>length(sbatch_todo)){
-        concurrent_sbatches=length(sbatch_todo)
+        if(can_still_run_x_sbatches>length(sbatch_todo)){
+        can_still_run_x_sbatches=length(sbatch_todo)
         }
 
-    sbatch_todo=sbatch_todo[1:concurrent_sbatches]
+    sbatch_todo=sbatch_todo[1:can_still_run_x_sbatches]
 
     for(sbt in sbatch_todo)
         {
@@ -79,7 +79,7 @@ if(concurrent_sbatches > 0){
         file_lock<-lock(sbatch_in_progress_check)
         if(!inprogressSinceInitialDate(sbatch_in_progress_check) & !end_script)
             {
-                if((concurrent_sbatches<-getToRunJobs(user,jobname,concurrent_sbatches))>0){
+                if((can_still_run_x_sbatches<-getToRunJobs(user,jobname,concurrent_sbatches))>0){
                     system(command=paste("echo ", now, " > ",sbt,".inprogress", sep=""), intern=TRUE)
                     print(system(command=paste("sbatch ",sbt,sep=""), intern=TRUE))
                     if(only_run_1==TRUE){print("Max Sbatches Total Reached. Only running 1 new job.")
