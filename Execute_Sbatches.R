@@ -20,7 +20,7 @@ inprogressSinceInitialDate=function(x)
 
 initial_timedate=as.POSIXct(args[1])
 now=Sys.time()
-sbatch_list=fread(args[2],data.table=FALSE,header=FALSE)$V1
+sbatch_list=readLines(args[2])
 concurrent_sbatches=as.numeric(args[3])
 jobname=args[4] # important to check how many jobs are actually running right now, because else it will increase exponentially if each job runs **concurrent_sbatches** new jobs
 user=args[5]
