@@ -41,7 +41,7 @@ if(length(args) > 5){
     }
 
 getToRunJobs=function(user,jobname,concurrent_sbatches){
-    count_of_running_jobs=as.numeric(system(command=paste("squeue -u ",user," -n ",jobname," | wc -l",sep=""), intern=TRUE))-1 # header line
+    count_of_running_jobs=as.numeric(system(command=paste("squeue -u ",user," -n ",jobname," | grep -v JOBID | wc -l",sep=""), intern=TRUE))
     print(paste("Currently running ", count_of_running_jobs, " jobs.", sep=""))
 concurrent_sbatches=concurrent_sbatches-count_of_running_jobs+1 # currently running job "substracted" by adding 1
 return(concurrent_sbatches)
