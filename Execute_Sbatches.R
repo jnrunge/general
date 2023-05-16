@@ -75,7 +75,7 @@ if(concurrent_sbatches > 0){
         file_lock<-lock(sbatch_in_progress_check)
         if(!inprogressSinceInitialDate(sbatch_in_progress_check))
             {
-                if(concurrent_sbatches<-getToRunJobs(user,jobname,concurrent_sbatches)>0){
+                if((concurrent_sbatches<-getToRunJobs(user,jobname,concurrent_sbatches))>0){
                     system(command=paste("echo ", now, " > ",sbt,".inprogress", sep=""), intern=TRUE)
                     print(system(command=paste("sbatch ",sbt,sep=""), intern=TRUE))
                     if(only_run_1==TRUE){stop("Max Sbatches Total Reached. Only running 1 new job.")}
