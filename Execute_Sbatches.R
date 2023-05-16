@@ -1,5 +1,6 @@
 args = commandArgs(trailingOnly=TRUE)
 library(data.table)
+library(flock)
 # the idea is that this script is supposed to check which of a list of sbatch files has been completed or is in progress and then queue the next uncompleted one. for that, we also need a datetime at which the first file has begun running.
 
 inprogressSinceInitialDate=function(x)
@@ -60,14 +61,16 @@ if(concurrent_sbatches > 0){
     for(sbt in sbatch_todo)
         {
         sbatch_in_progress_check=paste(sbatch_todo,".inprogress",sep="")
+        file_lock<-lock(sbatch_in_progress_check)
         sbatch_todo_check=sbatch_todo[!(unlist(lapply(sbatch_in_progress_check, inprogressSinceInitialDate)))]
         if(sbt %in% sbatch_todo_check)
             {
-            print(system(command=paste("sbatch ",sbt,sep=""), intern=TRUE))
             system(command=paste("echo ", now, " > ",sbt,".inprogress", sep=""))
+            print(system(command=paste("sbatch ",sbt,sep=""), intern=TRUE))
             if(only_run_1==TRUE){stop("Max Sbatches Total Reached. Only running 1 new job.")}
             Sys.sleep(10)
             }
+            unlock(file_lock)
         }
     }else{
     print("No capacity for further runs.")
