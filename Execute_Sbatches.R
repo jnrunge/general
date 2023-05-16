@@ -42,8 +42,9 @@ if(length(args) > 5){
 
 getToRunJobs=function(user,jobname,concurrent_sbatches){
     count_of_running_jobs=as.numeric(system(command=paste("squeue -u ",user," -n ",jobname," | grep -v JOBID | wc -l",sep=""), intern=TRUE))
-    print(paste("Currently running ", count_of_running_jobs, " jobs.", sep=""))
+    
 concurrent_sbatches=concurrent_sbatches-count_of_running_jobs+1 # currently running job "substracted" by adding 1
+print(paste("Currently running ", count_of_running_jobs, " jobs. Can schedule ",concurrent_sbatches," more.", sep=""))
 return(concurrent_sbatches)
 }
 
@@ -75,7 +76,7 @@ if(concurrent_sbatches > 0){
         if(!inprogressSinceInitialDate(sbatch_in_progress_check))
             {
                 if(concurrent_sbatches<-getToRunJobs(user,jobname,concurrent_sbatches)>0){
-                    system(command=paste("echo ", now, " > ",sbt,".inprogress", sep=""))
+                    system(command=paste("echo ", now, " > ",sbt,".inprogress", sep=""), intern=TRUE)
                     print(system(command=paste("sbatch ",sbt,sep=""), intern=TRUE))
                     if(only_run_1==TRUE){stop("Max Sbatches Total Reached. Only running 1 new job.")}
                     Sys.sleep(3)
