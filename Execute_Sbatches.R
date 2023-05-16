@@ -7,10 +7,14 @@ inprogressSinceInitialDate=function(x)
     {
     if(file.exists(x))
         {
-        if(as.numeric(initial_timedate-as.POSIXct(readLines(con = x))) < 0)
+            x_read<-readLines(con = x)
+            if(length(x_read)==0){
+                return(FALSE)
+            }
+            if(as.numeric(initial_timedate-as.POSIXct(x_read)) < 0)
             {
             return(TRUE)
-        }else{
+            }else{
             return(FALSE)
         }
     }else{
