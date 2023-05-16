@@ -50,6 +50,8 @@ return(concurrent_sbatches)
 
 concurrent_sbatches<-getToRunJobs(user,jobname,concurrent_sbatches)
 
+end_script=FALSE
+
 if(concurrent_sbatches > 0){
 
     sbatch_in_progress=paste(sbatch_list,".inprogress",sep="")
@@ -59,10 +61,12 @@ if(concurrent_sbatches > 0){
     print(paste(length(sbatch_todo), " sbatches remaining! Running ", concurrent_sbatches, " more...",sep=""))
     
     if(length(sbatch_todo)==0){
-        stop("No more sbatches to run!")
+        print("No more sbatches to run!")
+        end_script=TRUE
     }
-    
-    if(concurrent_sbatches>length(sbatch_todo)){
+
+    if(end_script==FALSE){
+        if(concurrent_sbatches>length(sbatch_todo)){
         concurrent_sbatches=length(sbatch_todo)
         }
 
@@ -73,18 +77,22 @@ if(concurrent_sbatches > 0){
         sbatch_in_progress_check=paste(sbt,".inprogress",sep="")
         print(paste0("Checking ",sbatch_in_progress_check))
         file_lock<-lock(sbatch_in_progress_check)
-        if(!inprogressSinceInitialDate(sbatch_in_progress_check))
+        if(!inprogressSinceInitialDate(sbatch_in_progress_check) & !end_script)
             {
                 if((concurrent_sbatches<-getToRunJobs(user,jobname,concurrent_sbatches))>0){
                     system(command=paste("echo ", now, " > ",sbt,".inprogress", sep=""), intern=TRUE)
                     print(system(command=paste("sbatch ",sbt,sep=""), intern=TRUE))
-                    if(only_run_1==TRUE){stop("Max Sbatches Total Reached. Only running 1 new job.")}
+                    if(only_run_1==TRUE){print("Max Sbatches Total Reached. Only running 1 new job.")
+                    end_script=TRUE}
                     Sys.sleep(3)
                 }
             
             }
         unlock(file_lock)
         }
+    }
+    
+    
     }else{
     print("No capacity for further runs.")
     }
