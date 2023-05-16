@@ -183,7 +183,7 @@ date
     
 }
 
-start_sbatch_list=function(sbatch_list, jobs_simul, jobname, initial_timedate, user){
+start_sbatch_list=function(sbatch_list, jobs_simul, jobname, initial_timedate, username){
     if(file.exists(sbatch_list)){
     print(system(command=paste("wc -l ", sbatch_list, sep=""),intern=TRUE))
     print(system(command=paste("Rscript ",td,"Execute_Sbatches.R '",initial_timedate,"' ",sbatch_list," ",jobs_simul," ",jobname, sep=""), intern=TRUE))
