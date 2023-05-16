@@ -60,17 +60,17 @@ if(concurrent_sbatches > 0){
 
     for(sbt in sbatch_todo)
         {
-        sbatch_in_progress_check=paste(sbatch_todo,".inprogress",sep="")
+        sbatch_in_progress_check=paste(sbt,".inprogress",sep="")
+        print(paste0("Checking ",sbatch_in_progress_check))
         file_lock<-lock(sbatch_in_progress_check)
-        sbatch_todo_check=sbatch_todo[!(unlist(lapply(sbatch_in_progress_check, inprogressSinceInitialDate)))]
-        if(sbt %in% sbatch_todo_check)
+        if(!inprogressSinceInitialDate(sbatch_in_progress_check))
             {
             system(command=paste("echo ", now, " > ",sbt,".inprogress", sep=""))
             print(system(command=paste("sbatch ",sbt,sep=""), intern=TRUE))
             if(only_run_1==TRUE){stop("Max Sbatches Total Reached. Only running 1 new job.")}
-            Sys.sleep(10)
+            Sys.sleep(3)
             }
-            unlock(file_lock)
+        unlock(file_lock)
         }
     }else{
     print("No capacity for further runs.")
