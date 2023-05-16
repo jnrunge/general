@@ -40,14 +40,14 @@ if(length(args) > 5){
         }
     }
 
-getToRunJobs=function(user,jobname){
+getToRunJobs=function(user,jobname,concurrent_sbatches){
     count_of_running_jobs=as.numeric(system(command=paste("squeue -u ",user," -n ",jobname," | wc -l",sep=""), intern=TRUE))-1 # header line
     print(paste("Currently running ", count_of_running_jobs, " jobs.", sep=""))
 concurrent_sbatches=concurrent_sbatches-count_of_running_jobs+1 # currently running job "substracted" by adding 1
 return(concurrent_sbatches)
 }
 
-concurrent_sbatches<-getToRunJobs(user,jobname)
+concurrent_sbatches<-getToRunJobs(user,jobname,concurrent_sbatches)
 
 if(concurrent_sbatches > 0){
 
@@ -74,7 +74,7 @@ if(concurrent_sbatches > 0){
         file_lock<-lock(sbatch_in_progress_check)
         if(!inprogressSinceInitialDate(sbatch_in_progress_check))
             {
-                if(getToRunJobs(user,jobname)>0){
+                if(concurrent_sbatches<-getToRunJobs(user,jobname,concurrent_sbatches)>0){
                     system(command=paste("echo ", now, " > ",sbt,".inprogress", sep=""))
                     print(system(command=paste("sbatch ",sbt,sep=""), intern=TRUE))
                     if(only_run_1==TRUE){stop("Max Sbatches Total Reached. Only running 1 new job.")}
