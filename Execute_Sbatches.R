@@ -33,7 +33,7 @@ only_run_1=FALSE
 maximum_sbatches_total=9999999
 if(length(args) > 5){
     print("Max Sbatches Total set. Checking...")
-    maximum_sbatches_total=args[6]
+    maximum_sbatches_total=as.numeric(args[6])
     count_of_running_jobs_total=as.numeric(system(command=paste("squeue -u ",user," | wc -l",sep=""), intern=TRUE))
     if(count_of_running_jobs_total > maximum_sbatches_total){
         only_run_1=TRUE
