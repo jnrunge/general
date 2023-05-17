@@ -13,8 +13,10 @@ if(length(args)==0){
     stop("no arguments")
 }
 file1=args[1]
+f1_lock<-flock::lock(file1)
 if(length(args)==3){
     file2=args[2]
+    f2_lock<-flock::lock(file2)
 }else{
     file2=file1
 }
@@ -171,4 +173,9 @@ if(length(dups2)>0){
     writeFastq(fastq2_filtered,paste0(file2,".tmp.gz"))
     file.rename(paste0(file2,".tmp.gz"),file2)
 }
+}
+
+flock::unlock(f1_lock)
+if(file1!=file2){
+    flock::unlock(f2_lock)
 }
