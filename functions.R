@@ -183,10 +183,10 @@ date
     
 }
 
-start_sbatch_list=function(sbatch_list, jobs_simul, jobname, initial_timedate, username){
+start_sbatch_list=function(sbatch_list, jobs_simul, jobname, initial_timedate, username, jobs_total=999){
     if(file.exists(sbatch_list)){
     print(system(command=paste("wc -l ", sbatch_list, sep=""),intern=TRUE))
-    print(system(command=paste("Rscript ",td,"Execute_Sbatches.R '",initial_timedate,"' ",sbatch_list," ",jobs_simul," ",jobname, " ", username, sep=""), intern=TRUE))
+    print(system(command=paste("Rscript ",td,"Execute_Sbatches.R '",initial_timedate,"' ",sbatch_list," ",jobs_simul," ",jobname, " ", username, " ", jobs_total, sep=""), intern=TRUE))
     }
 }
 
