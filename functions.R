@@ -113,7 +113,7 @@ getArgs=function(){
 execute_complex_sbatch=function(
                     list_of_cmds,jobname,scripts_dir,uniqueRunID,
                     cores,mem,time,env,initial_timedate,
-                    jobs_simul,jobs_total=999,list_of_additional_flags, activateEnvScript,Execute_Sbatches_Env){
+                    jobs_simul,jobs_total=999,list_of_additional_flags, activateEnvScript,Execute_Sbatches_Env,username){
     
     if(time=="short"){
         time="11:59:00"
@@ -165,7 +165,7 @@ date
 
 cd ",td,"
 . ",activateEnvScript, " ",Execute_Sbatches_Env,"
-Rscript Execute_Sbatches.R '",initial_timedate,"' ",sbatch_list," ",jobs_simul," ",jobname," ",jobs_total,"
+Rscript Execute_Sbatches.R '",initial_timedate,"' ",sbatch_list," ",jobs_simul," ",jobname," ",username," ",jobs_total,"
 
 date
     ",sep="")
