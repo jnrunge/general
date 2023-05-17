@@ -77,7 +77,7 @@ if(can_still_run_x_sbatches > 0){
         sbatch_in_progress_check=paste(sbt,".inprogress",sep="")
         print(paste0("Checking ",sbatch_in_progress_check))
         file_lock<-lock(sbatch_in_progress_check)
-        sbatch_list_lock<-flock::lock(sbatch_list)
+        sbatch_list_lock<-flock::lock(args[2])
         if(!inprogressSinceInitialDate(sbatch_in_progress_check) & !end_script)
             {
                 if((can_still_run_x_sbatches<-getToRunJobs(user,jobname,concurrent_sbatches))>0){
