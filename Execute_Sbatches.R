@@ -77,6 +77,7 @@ if(can_still_run_x_sbatches > 0){
         sbatch_in_progress_check=paste(sbt,".inprogress",sep="")
         print(paste0("Checking ",sbatch_in_progress_check))
         file_lock<-lock(sbatch_in_progress_check)
+        sbatch_list_lock<-flock::lock(sbatch_list)
         if(!inprogressSinceInitialDate(sbatch_in_progress_check) & !end_script)
             {
                 if((can_still_run_x_sbatches<-getToRunJobs(user,jobname,concurrent_sbatches))>0){
@@ -84,11 +85,12 @@ if(can_still_run_x_sbatches > 0){
                     print(system(command=paste("sbatch ",sbt,sep=""), intern=TRUE))
                     if(only_run_1==TRUE){print("Max Sbatches Total Reached. Only running 1 new job.")
                     end_script=TRUE}
-                    Sys.sleep(3)
+                    Sys.sleep(1)
                 }
             
             }
         unlock(file_lock)
+        flock::unlock(sbatch_list_lock)
         }
     }
     
