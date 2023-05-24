@@ -29,16 +29,21 @@ concurrent_sbatches=as.numeric(args[3])
 jobname=args[4] # important to check how many jobs are actually running right now, because else it will increase exponentially if each job runs **concurrent_sbatches** new jobs
 user=args[5]
 
-only_run_1=FALSE
-maximum_sbatches_total=9999999
-if(length(args) > 5){
-    print("Max Sbatches Total set. Checking...")
-    maximum_sbatches_total=as.numeric(args[6])
-    count_of_running_jobs_total=as.numeric(system(command=paste("squeue -u ",user," | wc -l",sep=""), intern=TRUE))
-    if(count_of_running_jobs_total > maximum_sbatches_total){
-        only_run_1=TRUE
+
+check_for_max_jobs=function(args,user,rate){
+    only_run_1=FALSE
+    if(length(args) > 5 & rbinom(1,1,rate) == 1){ # not to stress the slurm server too much
+        print("Max Sbatches Total set. Checking...")
+        maximum_sbatches_total=as.numeric(args[6])
+        count_of_running_jobs_total=as.numeric(system(command=paste("squeue -u ",user," | wc -l",sep=""), intern=TRUE))
+        if(count_of_running_jobs_total > maximum_sbatches_total){
+            only_run_1=TRUE
         }
     }
+    return(only_run_1)
+}
+
+only_run_1=check_for_max_jobs(args,user,1)
 
 getToRunJobs=function(user,jobname,concurrent_sbatches){
     count_of_running_jobs=as.numeric(system(command=paste("squeue -u ",user," -n ",jobname," | grep -v JOBID | wc -l",sep=""), intern=TRUE))
@@ -82,6 +87,7 @@ if(can_still_run_x_sbatches > 0){
         if(!inprogressSinceInitialDate(sbatch_in_progress_check) & !end_script)
             {
                 if((can_still_run_x_sbatches<-getToRunJobs(user,jobname,concurrent_sbatches))>0){
+                    only_run_1=check_for_max_jobs(args,user,0.1)
                     system(command=paste("echo ", now, " > ",sbt,".inprogress", sep=""), intern=TRUE)
                     print(system(command=paste("sbatch ",sbt,sep=""), intern=TRUE))
                     if(only_run_1==TRUE){print("Max Sbatches Total Reached. Only running 1 new job.")
